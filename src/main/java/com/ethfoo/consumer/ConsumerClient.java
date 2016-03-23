@@ -75,11 +75,6 @@ public class ConsumerClient extends SimpleChannelInboundHandler<Response>{
 	protected void channelRead0(ChannelHandlerContext ctx, Response response)
 			throws Exception {
 		this.response = response;
-		if( response.isError()){
-			System.out.println("channelRead: error-->" + response.getError());
-		}else{
-			System.out.println("channelRead: result-->" + response.getResult());
-		}
 		
 		synchronized(lock){
 			lock.notifyAll();

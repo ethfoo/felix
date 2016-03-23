@@ -1,4 +1,4 @@
-package classSource;
+package com.ethfoo.test;
 
 public interface Hello {
 	

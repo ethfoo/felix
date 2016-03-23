@@ -12,7 +12,6 @@ import io.netty.channel.SimpleChannelInboundHandler;
 public class ServerHandler extends SimpleChannelInboundHandler<Request>{
 	private Map<String, Object> exportClassMap;
 	
-	
 	public ServerHandler(Map<String, Object> exportClassMap){
 		this.exportClassMap = exportClassMap;
 	}
@@ -24,10 +23,8 @@ public class ServerHandler extends SimpleChannelInboundHandler<Request>{
 		response.setRequestId(request.getRequestId());
 		try{
 			Object result = handle(request);
-			System.out.println("serverHandler: result-->" + result.toString());
 			response.setResult(result);
 		}catch(Throwable t){
-			System.out.println("serverHandler: throwable-->" + t.getMessage());
 			response.setError(t);
 		}
 		
@@ -37,7 +34,6 @@ public class ServerHandler extends SimpleChannelInboundHandler<Request>{
 	
 	private Object handle(Request request) throws Throwable{
 		String clazzName = request.getClassName();
-		System.out.println("provider reveive: " + clazzName);
 		Object serviceBean = exportClassMap.get(clazzName);
 		
 		Class<?> serviceClass = serviceBean.getClass();
@@ -57,7 +53,6 @@ public class ServerHandler extends SimpleChannelInboundHandler<Request>{
 	@Override
 	public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause)
 			throws Exception {
-		// TODO Auto-generated method stub
 		super.exceptionCaught(ctx, cause);
 	}
 	

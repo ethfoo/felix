@@ -40,8 +40,6 @@ public class ConsumerProxy implements InvocationHandler{
 		request.setParameters(args);
 		request.setParameterTypes(method.getParameterTypes());
 		
-		System.out.println("in invoke request: " + request.toString());
-		
 		String host = addressProvider.getHost();
 		int port = addressProvider.getPort();
 		
@@ -50,11 +48,9 @@ public class ConsumerProxy implements InvocationHandler{
 		Response response = client.send(request);
 		
 		if(response.isError()){
-			System.out.println("get error");
 			throw response.getError();
 			//return null;
 		}else{
-			System.out.println("get result: " + response.getResult());
 			return response.getResult();
 		}
 		

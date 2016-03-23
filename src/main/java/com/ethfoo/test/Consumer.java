@@ -1,6 +1,4 @@
-package consumer;
-
-import classSource.Hello;
+package com.ethfoo.test;
 
 import com.ethfoo.consumer.ConsumerProxy;
 import com.ethfoo.registry.LocalAddressProvider;
