@@ -12,17 +12,20 @@ import io.netty.channel.socket.nio.NioServerSocketChannel;
 import java.util.Map;
 
 import com.ethfoo.registry.AddressProvider;
+import com.ethfoo.serializer.Decoder;
+import com.ethfoo.serializer.Encoder;
+import com.ethfoo.serializer.Request;
+import com.ethfoo.serializer.Response;
 
 public class Server {
 	private AddressProvider addressProvider;
-	private Map<String, Object> exportClassMap;
 	
 	
 	public Server(AddressProvider addressProvider){
 		this.addressProvider = addressProvider;
 	}
 	
-	public void export(Map exportClassMap) throws Exception{
+	public void export(final Map<String, Object> exportClassMap) throws Exception{
 		
 		EventLoopGroup bossGroup = new NioEventLoopGroup(); 
 		EventLoopGroup workerGroup = new NioEventLoopGroup();
@@ -37,16 +40,17 @@ public class Server {
 						@Override
 						protected void initChannel(SocketChannel ch)
 								throws Exception {
-							ch.pipeline().addLast();
+							ch.pipeline().addLast(new Encoder(Response.class))
+										 .addLast(new Decoder(Request.class))
+										 .addLast(new ServerHandler(exportClassMap));
 						}
 				 		 
 				 	 });
 			
-			ChannelFuture future = bootstrap.bind(addressProvider.getHost(),
-												  addressProvider.getPort()).sync();
+			ChannelFuture future = bootstrap.bind(addressProvider.getPort()).sync();
+			System.out.println("start server...");
 			
 			future.channel().closeFuture().sync();
-			
 		}finally{
 			bossGroup.shutdownGracefully();
 			workerGroup.shutdownGracefully();

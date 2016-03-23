@@ -38,6 +38,10 @@ public class Request {
 	public void setParameters(Object[] parameters) {
 		this.parameters = parameters;
 	}
+	@Override
+	public String toString() {
+		return "[requestId: " + requestId + " className: " + className + " methodName: " + methodName + " ]";
+	}
 	
 	
 

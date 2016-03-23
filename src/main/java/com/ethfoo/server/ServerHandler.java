@@ -17,7 +17,6 @@ public class ServerHandler extends SimpleChannelInboundHandler<Request>{
 		this.exportClassMap = exportClassMap;
 	}
 	
-	
 	@Override
 	protected void channelRead0(ChannelHandlerContext ctx, Request request)
 			throws Exception {
@@ -25,8 +24,10 @@ public class ServerHandler extends SimpleChannelInboundHandler<Request>{
 		response.setRequestId(request.getRequestId());
 		try{
 			Object result = handle(request);
+			System.out.println("serverHandler: result-->" + result.toString());
 			response.setResult(result);
 		}catch(Throwable t){
+			System.out.println("serverHandler: throwable-->" + t.getMessage());
 			response.setError(t);
 		}
 		
@@ -36,6 +37,7 @@ public class ServerHandler extends SimpleChannelInboundHandler<Request>{
 	
 	private Object handle(Request request) throws Throwable{
 		String clazzName = request.getClassName();
+		System.out.println("provider reveive: " + clazzName);
 		Object serviceBean = exportClassMap.get(clazzName);
 		
 		Class<?> serviceClass = serviceBean.getClass();

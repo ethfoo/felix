@@ -7,8 +7,7 @@ import java.util.UUID;
 
 import com.ethfoo.registry.AddressProvider;
 import com.ethfoo.serializer.Request;
-
-
+import com.ethfoo.serializer.Response;
 
 public class ConsumerProxy implements InvocationHandler{
 
@@ -18,13 +17,11 @@ public class ConsumerProxy implements InvocationHandler{
 		this.addressProvider = addressProvider;
 	}
 	
-	
 	/*
 	 * 绑定委托对象并返回一个代理类
 	 */
 	@SuppressWarnings("unchecked")
 	public <T> T bind(Class<?> interfaces){
-		
 		return (T)Proxy.newProxyInstance(interfaces.getClassLoader(), 
 				new Class<?>[]{interfaces}, this);
 	}
@@ -43,15 +40,24 @@ public class ConsumerProxy implements InvocationHandler{
 		request.setParameters(args);
 		request.setParameterTypes(method.getParameterTypes());
 		
+		System.out.println("in invoke request: " + request.toString());
+		
 		String host = addressProvider.getHost();
 		int port = addressProvider.getPort();
 		
 		//发送request
 		ConsumerClient client = new ConsumerClient(host, port);
+		Response response = client.send(request);
 		
+		if(response.isError()){
+			System.out.println("get error");
+			throw response.getError();
+			//return null;
+		}else{
+			System.out.println("get result: " + response.getResult());
+			return response.getResult();
+		}
 		
-		
-		return null;
 	}
 
 	

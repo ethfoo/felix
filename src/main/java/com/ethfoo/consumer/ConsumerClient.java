@@ -1,20 +1,31 @@
 package com.ethfoo.consumer;
 
+import java.util.concurrent.ExecutionException;
+
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.ChannelFuture;
+import io.netty.channel.ChannelFutureListener;
+import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.ChannelOption;
 import io.netty.channel.EventLoopGroup;
+import io.netty.channel.SimpleChannelInboundHandler;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
+import io.netty.util.concurrent.Future;
+import io.netty.util.concurrent.FutureListener;
 
+import com.ethfoo.serializer.Decoder;
+import com.ethfoo.serializer.Encoder;
 import com.ethfoo.serializer.Request;
 import com.ethfoo.serializer.Response;
 
-public class ConsumerClient {
+public class ConsumerClient extends SimpleChannelInboundHandler<Response>{
 	private String host;
 	private int port;
+	
+	private Response response;
 
 	private byte[] lock = new byte[1];
 	
@@ -36,7 +47,9 @@ public class ConsumerClient {
 				@Override
 				protected void initChannel(SocketChannel ch) throws Exception {
 					ch.pipeline()
-					.addLast(new ConsumerClientHandler());	//TODO 添加编解码、添加客户端处理
+					.addLast(new Decoder(Response.class))
+					.addLast(new Encoder(Request.class))
+					.addLast(ConsumerClient.this);	
 					
 				}
 				 
@@ -45,16 +58,31 @@ public class ConsumerClient {
 			ChannelFuture future = b.connect(host, port).sync();
 			future.channel().writeAndFlush(request).sync();
 			
-			
-			
-			
-			
+			synchronized(lock){
+				lock.wait();
+			}
 			
 		}finally{
 			group.shutdownGracefully();
 		}
 		
 		
-		return null;
+		return response;
+	}
+
+
+	@Override
+	protected void channelRead0(ChannelHandlerContext ctx, Response response)
+			throws Exception {
+		this.response = response;
+		if( response.isError()){
+			System.out.println("channelRead: error-->" + response.getError());
+		}else{
+			System.out.println("channelRead: result-->" + response.getResult());
+		}
+		
+		synchronized(lock){
+			lock.notifyAll();
+		}
 	}
 }

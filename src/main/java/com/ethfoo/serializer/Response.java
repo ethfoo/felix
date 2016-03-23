@@ -29,5 +29,10 @@ public class Response {
 		return error != null;
 	}
 	
+	@Override
+	public String toString() {
+		return "[requestId: " + requestId +" error: " + error + " result: " + result + "]"; 
+	}
+	
 	
 }
