@@ -45,7 +45,7 @@ public class ConsumerProxy implements InvocationHandler{
 		
 		//发送request
 		ConsumerClient client = new ConsumerClient(host, port);
-		Response response = client.send(request);
+		Response response = client.init(request);
 		
 		if(response.isError()){
 			throw response.getError();

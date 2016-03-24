@@ -35,7 +35,7 @@ public class ConsumerClient extends SimpleChannelInboundHandler<Response>{
 	}
 	
 	
-	public Response send(Request request) throws InterruptedException{
+	public Response init(Request request) throws InterruptedException{
 		EventLoopGroup group = new NioEventLoopGroup();
 		try{
 			Bootstrap b = new Bootstrap();

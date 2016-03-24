@@ -33,6 +33,9 @@ public class Server implements ApplicationContextAware, InitializingBean{
 		this.addressProvider = addressProvider;
 	}
 
+	/*
+	 * 得到application context，在其中获得加了RpcProvider注解的beans，beans上加的注解value值为interfaceName
+	 */
 	public void setApplicationContext(ApplicationContext ctx) throws BeansException {
 		Map<String, Object> beanMap = ctx.getBeansWithAnnotation(RpcProvider.class);
 		if( !beanMap.isEmpty() ){
@@ -44,6 +47,9 @@ public class Server implements ApplicationContextAware, InitializingBean{
 		}
 	}
 	
+	/*
+	 * bean的初始化
+	 */
 	public void afterPropertiesSet() throws Exception {
 		EventLoopGroup bossGroup = new NioEventLoopGroup(); 
 		EventLoopGroup workerGroup = new NioEventLoopGroup();
