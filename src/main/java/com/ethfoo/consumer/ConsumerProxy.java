@@ -11,12 +11,17 @@ import com.ethfoo.serializer.Response;
 
 public class ConsumerProxy implements InvocationHandler{
 
-	private AddressProvider addressProvider;
 	
-	public ConsumerProxy(AddressProvider addressProvider){
-		this.addressProvider = addressProvider;
+	private ConsumerClient consumerClient;
+	
+	public ConsumerProxy(){
+		
 	}
 	
+	public void setConsumerClient(ConsumerClient consumerClient) {
+		this.consumerClient = consumerClient;
+	}
+
 	/*
 	 * 绑定委托对象并返回一个代理类
 	 */
@@ -27,11 +32,9 @@ public class ConsumerProxy implements InvocationHandler{
 	}
 
 	/*
-	 * 调用方法，返回远程服务器返回的Response
+	 * 调用方法，返回异步调用的RpcFuture
 	 */
-	public Object invoke(Object proxy, Method method, Object[] args)
-			throws Throwable {
-		
+	public RpcFuture call(Method method, Object[] args){
 		//封装request
 		Request request = new Request();
 		request.setRequestId(UUID.randomUUID().toString());
@@ -40,20 +43,20 @@ public class ConsumerProxy implements InvocationHandler{
 		request.setParameters(args);
 		request.setParameterTypes(method.getParameterTypes());
 		
-		String host = addressProvider.getHost();
-		int port = addressProvider.getPort();
+		RpcFuture future = consumerClient.send(request);
 		
-		//发送request
-		ConsumerClient client = new ConsumerClient(host, port);
-		Response response = client.init(request);
+		return future;
+	}
+	
+	
+	/*
+	 * 返回同步调用的结果，其实也是用的异步调用的阻塞方法
+	 */
+	public Object invoke(Object proxy, Method method, Object[] args) throws Throwable{
 		
-		if(response.isError()){
-			throw response.getError();
-			//return null;
-		}else{
-			return response.getResult();
-		}
-		
+		RpcFuture future = call(method, args);
+	
+		return future.get();
 	}
 
 	

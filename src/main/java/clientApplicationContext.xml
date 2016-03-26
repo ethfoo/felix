@@ -7,13 +7,15 @@
 						http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-4.1.xsd
 						http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-4.1.xsd"
 						>
-	
-   
     
     <bean id="AddressProvider" class="com.ethfoo.registry.LocalAddressProvider"/>
 
+	<bean id="ConsumerClient" class="com.ethfoo.consumer.ConsumerClient">
+		<constructor-arg name="addressProvider" ref="AddressProvider"/>
+	</bean>
+
 	<bean id="ConsumerProxy" class="com.ethfoo.consumer.ConsumerProxy">
-			<constructor-arg name="addressProvider" ref="AddressProvider"/>
+		<property name="consumerClient" ref="ConsumerClient" />
 	</bean>
 	
 </beans>
