@@ -15,16 +15,18 @@ public class Consumer {
 		
 		ApplicationContext ctx = new ClassPathXmlApplicationContext("classpath:clientApplicationContext.xml");
 		ConsumerProxy proxy = (ConsumerProxy)ctx.getBean("ConsumerProxy");
-		proxy.bind(Hello.class);
-		/*try {
+		
+		try {
+			Hello hello = proxy.bind(Hello.class);
 			String result = hello.sayHello("fuck");
 			System.out.println("Consumer receive: " + result);
 		} catch (Throwable e) {
 			e.printStackTrace();
-		}*/
+		}
 		
-		
+		/*
 		try {
+			proxy.bind(Hello.class);
 			RpcFuture future = proxy.call("sayHello", "fuckU");
 			future.addListener(new RpcFutureListener() {
 				
@@ -42,7 +44,7 @@ public class Consumer {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		
+		*/
 	
 		
 	}

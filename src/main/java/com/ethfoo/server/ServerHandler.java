@@ -17,6 +17,16 @@ public class ServerHandler extends SimpleChannelInboundHandler<Request>{
 	}
 	
 	@Override
+	public void channelActive(ChannelHandlerContext ctx) throws Exception {
+		System.out.println(ctx.channel().toString() + " is active");
+	}
+
+	@Override
+	public void channelInactive(ChannelHandlerContext ctx) throws Exception {
+		System.out.println(ctx.channel().toString() + " is inactive");
+	}
+
+	@Override
 	protected void channelRead0(ChannelHandlerContext ctx, Request request)
 			throws Exception {
 		Response response = new Response();
