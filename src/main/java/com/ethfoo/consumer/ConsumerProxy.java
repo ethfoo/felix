@@ -41,6 +41,7 @@ public class ConsumerProxy implements InvocationHandler{
 			parameterTypes[i] = args[i].getClass();
 		}
 		Method method = interfaces.getMethod(methodName,  parameterTypes);
+		
 
 		//封装request
 		Request request = new Request();

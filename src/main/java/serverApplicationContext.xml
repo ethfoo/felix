@@ -9,8 +9,12 @@
 						>
 	
     <context:component-scan base-package="com.ethfoo.test"/>
+    <context:property-placeholder location="classpath:config.properties" />
     
-    <bean id="AddressProvider" class="com.ethfoo.registry.LocalAddressProvider"/>
+    <bean id="AddressProvider" class="com.ethfoo.registry.LocalAddressProvider">
+    	<property name="host" value="${host}"></property>
+    	<property name="port" value="${port}"></property>
+    </bean>
 
 	<bean id="RpcServer" class="com.ethfoo.server.Server">
 			<constructor-arg name="addressProvider" ref="AddressProvider"/>

@@ -68,8 +68,8 @@ public class ConsumerClient implements InitializingBean{
 			
 			//TODO 以后尝试使用连接池连接，加入心跳检测
 			
+			System.out.println("connected to server" + ",server host:" + host + ", port:" + port);
 			channel = b.connect(host, port).sync().channel();
-			System.out.println("connected to server");
 			
 		}catch(Exception exception){
 			exception.printStackTrace();
