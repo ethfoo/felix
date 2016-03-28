@@ -1,4 +1,4 @@
-package com.ethfoo.consumer;
+package com.ethfoo.async;
 
 public interface RpcFutureListener {
 	

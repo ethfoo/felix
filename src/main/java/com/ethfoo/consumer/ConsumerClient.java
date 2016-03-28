@@ -22,6 +22,8 @@ import io.netty.channel.socket.nio.NioSocketChannel;
 import io.netty.util.concurrent.Future;
 import io.netty.util.concurrent.FutureListener;
 
+import com.ethfoo.aop.RpcInvokeHook;
+import com.ethfoo.async.RpcFuture;
 import com.ethfoo.registry.AddressProvider;
 import com.ethfoo.serializer.Decoder;
 import com.ethfoo.serializer.Encoder;
@@ -33,12 +35,18 @@ public class ConsumerClient implements InitializingBean{
 	private int port;
 	private EventLoopGroup group;
 	private Channel channel;
+	private RpcInvokeHook hook;
 	
 	private ConcurrentMap<String, RpcFuture> rpcFutureMap = new ConcurrentHashMap<String, RpcFuture>(); 
 	
 	public ConsumerClient(AddressProvider addressProvider){
 		host = addressProvider.getHost();
 		port = addressProvider.getPort();
+	}
+	public ConsumerClient(AddressProvider addressProvider, RpcInvokeHook hook){
+		host = addressProvider.getHost();
+		port = addressProvider.getPort();
+		this.hook = hook;
 	}
 	
 	/*
@@ -60,13 +68,13 @@ public class ConsumerClient implements InitializingBean{
 					ch.pipeline()
 					.addLast(new Decoder(Response.class))
 					.addLast(new Encoder(Request.class))
-					.addLast(handlerResponseGroup, new ConsumerClientHandler(rpcFutureMap));	
+					.addLast(handlerResponseGroup, new ConsumerClientHandler(rpcFutureMap,hook));	
 					
 				}
 				 
 			 });
 			
-			//TODO 以后尝试使用连接池连接，加入心跳检测
+			//TODO 以后尝试使用连接组连接，加入心跳检测
 			
 			System.out.println("connected to server" + ",server host:" + host + ", port:" + port);
 			channel = b.connect(host, port).sync().channel();
@@ -80,6 +88,10 @@ public class ConsumerClient implements InitializingBean{
 	 * 选择一个channel，发送request
 	 */
 	public RpcFuture send(Request request){
+		if( hook != null){
+			hook.beforeInvoke(request);
+		}
+		
 		RpcFuture rpcFuture = new RpcFuture();
 		rpcFutureMap.put(request.getRequestId(), rpcFuture);
 		if( channel != null){

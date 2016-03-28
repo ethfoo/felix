@@ -1,4 +1,4 @@
-package com.ethfoo.consumer;
+package com.ethfoo.async;
 
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;

@@ -3,6 +3,7 @@ package com.ethfoo.server;
 import java.lang.reflect.Method;
 import java.util.Map;
 
+import com.ethfoo.aop.RpcInvokeHook;
 import com.ethfoo.serializer.Request;
 import com.ethfoo.serializer.Response;
 
@@ -11,9 +12,14 @@ import io.netty.channel.SimpleChannelInboundHandler;
 
 public class ServerHandler extends SimpleChannelInboundHandler<Request>{
 	private Map<String, Object> exportClassMap;
+	private RpcInvokeHook hook;
 	
 	public ServerHandler(Map<String, Object> exportClassMap){
 		this.exportClassMap = exportClassMap;
+	}
+	public ServerHandler(Map<String, Object> exportClassMap, RpcInvokeHook hook){
+		this.exportClassMap = exportClassMap;
+		this.hook = hook;
 	}
 	
 	@Override
@@ -29,6 +35,9 @@ public class ServerHandler extends SimpleChannelInboundHandler<Request>{
 	@Override
 	protected void channelRead0(ChannelHandlerContext ctx, Request request)
 			throws Exception {
+		if( hook != null){
+			hook.beforeInvoke(request);
+		}
 		Response response = new Response();
 		response.setRequestId(request.getRequestId());
 		try{
@@ -39,7 +48,9 @@ public class ServerHandler extends SimpleChannelInboundHandler<Request>{
 		}
 		
 		ctx.writeAndFlush(response);
-		
+		if( hook != null){
+			hook.afterInvoke(response);
+		}
 	}
 	
 	private Object handle(Request request) throws Throwable{

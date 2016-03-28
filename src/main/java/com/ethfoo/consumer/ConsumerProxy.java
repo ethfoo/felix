@@ -5,6 +5,7 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.util.UUID;
 
+import com.ethfoo.async.RpcFuture;
 import com.ethfoo.registry.AddressProvider;
 import com.ethfoo.serializer.Request;
 import com.ethfoo.serializer.Response;
