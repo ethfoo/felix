@@ -25,7 +25,8 @@ public class ClientTaskRunnable implements Runnable{
 	public ClientTaskRunnable(ConsumerProxy proxy, CountDownLatch latch){
 		this.latch = latch;
 		this.proxy = proxy;
-		content = new byte[1024].toString();
+		//content = new byte[1024].toString();
+		content = "Hello";
 	}
 	
 
@@ -33,11 +34,12 @@ public class ClientTaskRunnable implements Runnable{
 	public void run() {
 		
 		Hello hello = proxy.bind(Hello.class);
-		for( int i=0; i<10000; i++){
+		for( int i=0; i<1000; i++){
 			try {
 				//RpcFuture future = proxy.call("sayHello", content);
 				//future.get();
-				hello.sayHello(content);
+				String result = hello.sayHello(content);
+				System.out.println(Thread.currentThread().getName() + " receive :" + result);
 			} catch (Throwable e) {
 				e.printStackTrace();
 			}
@@ -45,6 +47,7 @@ public class ClientTaskRunnable implements Runnable{
 		
 		
 		latch.countDown();
+		System.out.println(Thread.currentThread().getName() + " countDown");
 	}
 
 }

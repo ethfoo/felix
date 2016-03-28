@@ -19,18 +19,19 @@ public class ClientBenchMarkTest {
 	
 	public ClientBenchMarkTest(int threadNum){
 		latch = new CountDownLatch(threadNum);
-
+		this.threadNum = threadNum;
 		ApplicationContext ctx = new ClassPathXmlApplicationContext("classpath:clientApplicationContext.xml");
 		proxy = (ConsumerProxy)ctx.getBean("ConsumerProxy");
-
 	}
 	
 	public void runTest(){
 		
+		System.out.println("threadNum-->" + threadNum);
 		//ExecutorService executor = Executors.newFixedThreadPool(threadNum);
-		//executor.submit(new ClientTaskRunnable(proxy, latch));
 		startTime = System.currentTimeMillis();
+		System.out.println("startTime=" + startTime);
 		for(int i=0; i<threadNum; i++){
+			//executor.submit(new ClientTaskRunnable(proxy, latch));
 			Thread thread = new Thread(new ClientTaskRunnable(proxy, latch), "thread-"+i);
 			thread.start();
 		}
@@ -43,11 +44,16 @@ public class ClientBenchMarkTest {
 		try {
 			latch.await();
 			endTime = System.currentTimeMillis();
-			Long tps = (threadNum*10000)/(endTime-startTime);
+			System.out.println("endTime=" + endTime);
+			double tps = ((threadNum*1000)/((endTime-startTime)/1000f));
 			System.out.println("tps-->" + tps);
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}
+	}
+	
+	public static void main(String args[]){
+		new ClientBenchMarkTest(4).runTest();
 	}
 
 }
