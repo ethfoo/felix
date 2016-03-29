@@ -27,15 +27,20 @@ public class ClientBenchMarkTest {
 	}
 	
 	public void runTest(){
-		
+		try {
+			Thread.sleep(3000); //delay for the channel connection
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
 		System.out.println("threadNum-->" + threadNum);
-		//ExecutorService executor = Executors.newFixedThreadPool(threadNum);
+		System.out.println("loopNum-->" + loopNum);
+		ExecutorService executor = Executors.newFixedThreadPool(threadNum);
 		startTime = System.currentTimeMillis();
 		System.out.println("startTime=" + startTime);
 		for(int i=0; i<threadNum; i++){
-			//executor.submit(new ClientTaskRunnable(proxy, latch));
-			Thread thread = new Thread(new ClientTaskRunnable(proxy, latch, loopNum), "thread-"+i);
-			thread.start();
+			executor.submit(new ClientTaskRunnable(proxy, latch,loopNum));
+			//Thread thread = new Thread(new ClientTaskRunnable(proxy, latch, loopNum), "thread-"+i);
+			//thread.start();
 		}
 		
 		printInfo();
@@ -48,6 +53,7 @@ public class ClientBenchMarkTest {
 			endTime = System.currentTimeMillis();
 			System.out.println("endTime=" + endTime);
 			double tps = ((threadNum*loopNum)/((endTime-startTime)/1000f));
+			
 			System.out.println("tps-->" + tps);
 		} catch (InterruptedException e) {
 			e.printStackTrace();
@@ -55,7 +61,7 @@ public class ClientBenchMarkTest {
 	}
 	
 	public static void main(String args[]){
-		new ClientBenchMarkTest(50, 10000).runTest();
+		new ClientBenchMarkTest(50, 100000).runTest();
 	}
 
 }

@@ -56,8 +56,7 @@ public class ConsumerProxy implements InvocationHandler{
 		
 		return future;
 	}
-	
-	
+
 	/*
 	 * 返回同步调用的结果，其实也是用的异步调用的阻塞方法
 	 */

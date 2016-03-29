@@ -18,6 +18,7 @@
 
 	<bean id="ConsumerClient" class="com.ethfoo.consumer.ConsumerClient">
 		<constructor-arg name="addressProvider" ref="AddressProvider"/>
+		<property name="connCount" value="${connCount}"></property>
 	</bean>
 
 	<bean id="ConsumerProxy" class="com.ethfoo.consumer.ConsumerProxy">

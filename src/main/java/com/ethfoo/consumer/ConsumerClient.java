@@ -1,8 +1,11 @@
 package com.ethfoo.consumer;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Logger;
 
 import org.springframework.beans.factory.InitializingBean;
@@ -36,6 +39,10 @@ public class ConsumerClient implements InitializingBean{
 	private EventLoopGroup group;
 	private Channel channel;
 	private RpcInvokeHook hook;
+	private final AtomicInteger index = new AtomicInteger();
+	private List<Channel> channelList = new ArrayList<Channel>();
+	private int connCount = 1;
+	private Bootstrap bootstrap;
 	
 	private ConcurrentMap<String, RpcFuture> rpcFutureMap = new ConcurrentHashMap<String, RpcFuture>(); 
 	
@@ -43,12 +50,16 @@ public class ConsumerClient implements InitializingBean{
 		host = addressProvider.getHost();
 		port = addressProvider.getPort();
 	}
-	public ConsumerClient(AddressProvider addressProvider, RpcInvokeHook hook){
-		host = addressProvider.getHost();
-		port = addressProvider.getPort();
+	
+	public void setHook(RpcInvokeHook hook) {
 		this.hook = hook;
 	}
-	
+
+	public void setConnCount(int connCount) {
+		this.connCount = connCount;
+		System.out.println("the connections count is: " + connCount);
+	}
+
 	/*
 	 * 在初始化时建立连接
 	 */
@@ -57,8 +68,8 @@ public class ConsumerClient implements InitializingBean{
 		final EventLoopGroup handlerResponseGroup = new NioEventLoopGroup(Runtime.getRuntime().availableProcessors()*2);
 		
 		try{
-			Bootstrap b = new Bootstrap();
-			b.group(group)
+			bootstrap = new Bootstrap();
+			bootstrap.group(group)
 			 .channel(NioSocketChannel.class)
 			 .option(ChannelOption.SO_KEEPALIVE, true)
 			 .handler(new ChannelInitializer<SocketChannel>(){
@@ -77,7 +88,10 @@ public class ConsumerClient implements InitializingBean{
 			//TODO 以后尝试使用连接组连接，加入心跳检测
 			
 			System.out.println("connected to server" + ",server host:" + host + ", port:" + port);
-			channel = b.connect(host, port).sync().channel();
+			for( int i=0; i<connCount; i++){
+				channel = bootstrap.connect(host, port).channel();
+				channelList.add(channel);
+			}
 			
 		}catch(Exception exception){
 			exception.printStackTrace();
@@ -94,13 +108,40 @@ public class ConsumerClient implements InitializingBean{
 		
 		RpcFuture rpcFuture = new RpcFuture();
 		rpcFutureMap.put(request.getRequestId(), rpcFuture);
-		if( channel != null){
-			channel.writeAndFlush(request);
-		}
+		nextChannel().writeAndFlush(request);
 		return rpcFuture;
 	}
+	
+	private Channel nextChannel(){
+		return getFirstChannelActive(0);
+	}
 
-
-
+	private Channel getFirstChannelActive(int count){
+		Channel channel = channelList.get(Math.abs(index.getAndIncrement()%channelList.size()));
+		
+		//如果该channel为inActive，则重连并递归的选择下一个channel
+		if( !channel.isActive() ){
+			reconnect(channel);
+			
+			//如果所有的channel都已被用完，抛出异常
+			if( count > channelList.size() ){
+				throw new RuntimeException("no channel can be use");
+			}
+			
+			return getFirstChannelActive(count + 1);
+		}
+		
+		return channel;
+	}
+	private void reconnect(Channel channel) {
+		//重连的时候有可能该channel被其他线程使用新的可使用的channel替换
+		synchronized(channel){
+			if( channelList.indexOf(channel) == -1){
+				return;
+			}
+		}
+		Channel newChannel = bootstrap.connect(host, port).channel();
+		channelList.set(channelList.indexOf(channel), newChannel);
+	}
 
 }
