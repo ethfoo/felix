@@ -10,7 +10,7 @@ public class RpcFuture {
 	private CountDownLatch countDownLatch; 
 	private RpcFutureListener listener;
 	private enum state{UNCOMPLETE, SUCCESS, EXCEPTION};
-	private static state currentState;
+	private volatile state currentState;
 
 	public RpcFuture(){
 		countDownLatch = new CountDownLatch(1);

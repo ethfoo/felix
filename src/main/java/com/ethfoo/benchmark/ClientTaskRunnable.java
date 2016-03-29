@@ -18,13 +18,15 @@ public class ClientTaskRunnable implements Runnable{
 	private CountDownLatch latch;
 	private ConsumerProxy proxy;
 	private String content;
+	private int loopNum;
 	
 	//private Map<String, Integer> results = new HashMap<>();
 	
 	
-	public ClientTaskRunnable(ConsumerProxy proxy, CountDownLatch latch){
+	public ClientTaskRunnable(ConsumerProxy proxy, CountDownLatch latch, int loopNum){
 		this.latch = latch;
 		this.proxy = proxy;
+		this.loopNum = loopNum;
 		//content = new byte[1024].toString();
 		content = "Hello";
 	}
@@ -34,12 +36,18 @@ public class ClientTaskRunnable implements Runnable{
 	public void run() {
 		
 		Hello hello = proxy.bind(Hello.class);
-		for( int i=0; i<1000; i++){
+		for( int i=0; i<loopNum; i++){
 			try {
-				//RpcFuture future = proxy.call("sayHello", content);
-				//future.get();
-				String result = hello.sayHello(content);
-				System.out.println(Thread.currentThread().getName() + " receive :" + result);
+				RpcFuture future = proxy.call("sayHello", content);
+				Object obj = future.get();
+				if( obj instanceof String){
+					String result = (String)obj;
+					//System.out.println(Thread.currentThread().getName() + " receive :" + result);
+				}else if( obj instanceof Throwable){
+					Throwable th = (Throwable)obj;
+					//System.out.println(Thread.currentThread().getName() + " throwable :" + th.getMessage());
+				}
+				//String result = hello.sayHello(content);
 			} catch (Throwable e) {
 				e.printStackTrace();
 			}

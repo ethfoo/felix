@@ -11,15 +11,17 @@ import com.ethfoo.consumer.ConsumerProxy;
 
 public class ClientBenchMarkTest {
 	private int threadNum;
+	private int loopNum;
 	private CountDownLatch latch;
 	private ConsumerProxy proxy;
 	
 	private Long startTime;
 	private Long endTime;
 	
-	public ClientBenchMarkTest(int threadNum){
+	public ClientBenchMarkTest(int threadNum, int loopNum){
 		latch = new CountDownLatch(threadNum);
 		this.threadNum = threadNum;
+		this.loopNum = loopNum;
 		ApplicationContext ctx = new ClassPathXmlApplicationContext("classpath:clientApplicationContext.xml");
 		proxy = (ConsumerProxy)ctx.getBean("ConsumerProxy");
 	}
@@ -32,7 +34,7 @@ public class ClientBenchMarkTest {
 		System.out.println("startTime=" + startTime);
 		for(int i=0; i<threadNum; i++){
 			//executor.submit(new ClientTaskRunnable(proxy, latch));
-			Thread thread = new Thread(new ClientTaskRunnable(proxy, latch), "thread-"+i);
+			Thread thread = new Thread(new ClientTaskRunnable(proxy, latch, loopNum), "thread-"+i);
 			thread.start();
 		}
 		
@@ -53,7 +55,7 @@ public class ClientBenchMarkTest {
 	}
 	
 	public static void main(String args[]){
-		new ClientBenchMarkTest(4).runTest();
+		new ClientBenchMarkTest(4, 1000).runTest();
 	}
 
 }
