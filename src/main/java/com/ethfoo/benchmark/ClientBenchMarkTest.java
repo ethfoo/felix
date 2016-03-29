@@ -47,7 +47,7 @@ public class ClientBenchMarkTest {
 			latch.await();
 			endTime = System.currentTimeMillis();
 			System.out.println("endTime=" + endTime);
-			double tps = ((threadNum*1000)/((endTime-startTime)/1000f));
+			double tps = ((threadNum*loopNum)/((endTime-startTime)/1000f));
 			System.out.println("tps-->" + tps);
 		} catch (InterruptedException e) {
 			e.printStackTrace();
@@ -55,7 +55,7 @@ public class ClientBenchMarkTest {
 	}
 	
 	public static void main(String args[]){
-		new ClientBenchMarkTest(4, 1000).runTest();
+		new ClientBenchMarkTest(50, 10000).runTest();
 	}
 
 }
