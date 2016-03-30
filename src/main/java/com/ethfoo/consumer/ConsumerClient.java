@@ -22,6 +22,7 @@ import io.netty.channel.SimpleChannelInboundHandler;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
+import io.netty.handler.timeout.IdleStateHandler;
 import io.netty.util.concurrent.Future;
 import io.netty.util.concurrent.FutureListener;
 
@@ -34,6 +35,7 @@ import com.ethfoo.serializer.Request;
 import com.ethfoo.serializer.Response;
 
 public class ConsumerClient implements InitializingBean{
+	private AddressProvider addressProvider;
 	private String host;
 	private int port;
 	private EventLoopGroup group;
@@ -43,10 +45,12 @@ public class ConsumerClient implements InitializingBean{
 	private List<Channel> channelList = new ArrayList<Channel>();
 	private int connCount = 1;
 	private Bootstrap bootstrap;
+	private static final int IDLE_TIME = 5;
 	
 	private ConcurrentMap<String, RpcFuture> rpcFutureMap = new ConcurrentHashMap<String, RpcFuture>(); 
 	
 	public ConsumerClient(AddressProvider addressProvider){
+		this.addressProvider = addressProvider;
 		host = addressProvider.getHost();
 		port = addressProvider.getPort();
 	}
@@ -79,13 +83,14 @@ public class ConsumerClient implements InitializingBean{
 					ch.pipeline()
 					.addLast(new Decoder(Response.class))
 					.addLast(new Encoder(Request.class))
+					.addLast(new IdleStateHandler(0, 0, IDLE_TIME))
+					.addLast(new ClientHeartBeatHandler(bootstrap, channelList, addressProvider))
 					.addLast(handlerResponseGroup, new ConsumerClientHandler(rpcFutureMap,hook));	
 					
 				}
 				 
 			 });
 			
-			//TODO 以后尝试使用连接组连接，加入心跳检测
 			
 			System.out.println("connected to server" + ",server host:" + host + ", port:" + port);
 			for( int i=0; i<connCount; i++){
@@ -112,7 +117,7 @@ public class ConsumerClient implements InitializingBean{
 		return rpcFuture;
 	}
 	
-	private Channel nextChannel(){
+	public Channel nextChannel(){
 		return getFirstChannelActive(0);
 	}
 
@@ -133,6 +138,7 @@ public class ConsumerClient implements InitializingBean{
 		
 		return channel;
 	}
+	
 	private void reconnect(Channel channel) {
 		//重连的时候有可能该channel被其他线程使用新的可使用的channel替换
 		synchronized(channel){

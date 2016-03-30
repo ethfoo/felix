@@ -61,7 +61,7 @@ public class ClientBenchMarkTest {
 	}
 	
 	public static void main(String args[]){
-		new ClientBenchMarkTest(50, 100000).runTest();
+		new ClientBenchMarkTest(40, 100000).runTest();
 	}
 
 }

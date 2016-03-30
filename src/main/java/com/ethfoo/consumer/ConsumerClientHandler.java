@@ -12,19 +12,30 @@ import io.netty.channel.SimpleChannelInboundHandler;
 public class ConsumerClientHandler extends SimpleChannelInboundHandler<Response>{
 	private ConcurrentMap<String, RpcFuture> rpcFutureMap;
 	private RpcInvokeHook hook;
+	private ConsumerClient client;
 
 	public ConsumerClientHandler(ConcurrentMap<String, RpcFuture> rpcFutureMap){
 		this.rpcFutureMap = rpcFutureMap;
 	}
 	public ConsumerClientHandler(ConcurrentMap<String, RpcFuture> rpcFutureMap, RpcInvokeHook hook){
 		this.rpcFutureMap = rpcFutureMap;
+		this.hook = hook;
+	}
+	
+	public ConsumerClientHandler(ConsumerClient client, ConcurrentMap<String, RpcFuture> rpcFutureMap, RpcInvokeHook hook){
+		this.client = client;
+		this.rpcFutureMap = rpcFutureMap;
+		this.hook = hook;
 	}
 	
 	@Override
 	protected void channelRead0(ChannelHandlerContext ctx, Response response)
 			throws Exception {
-		
-		handlerResponse(response);
+		if( !response.isHeartBeat() ){
+			handlerResponse(response);
+		}else{
+			ctx.fireChannelRead(response);
+		}
 	}
 
 	private void handlerResponse(Response response) {
@@ -39,5 +50,7 @@ public class ConsumerClientHandler extends SimpleChannelInboundHandler<Response>
 			future.setResult(response.getResult());
 		}
 	}
+	
+	
 
 }

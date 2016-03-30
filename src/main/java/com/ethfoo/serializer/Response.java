@@ -5,7 +5,7 @@ public class Response {
 	private String requestId;
 	private Throwable error;
 	private Object result;
-	
+	private boolean heartBeat;
 	public String getRequestId() {
 		return requestId;
 	}
@@ -28,7 +28,12 @@ public class Response {
 	public boolean isError(){
 		return error != null;
 	}
-	
+	public boolean isHeartBeat() {
+		return heartBeat;
+	}
+	public void setHeartBeat(boolean heartBeat) {
+		this.heartBeat = heartBeat;
+	}
 	@Override
 	public String toString() {
 		return "[requestId: " + requestId +" error: " + error + " result: " + result + "]"; 

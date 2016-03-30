@@ -8,6 +8,7 @@ import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
+import io.netty.handler.timeout.IdleStateHandler;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -28,6 +29,7 @@ import com.ethfoo.serializer.Response;
 
 public class Server implements ApplicationContextAware, InitializingBean{
 	private AddressProvider addressProvider;
+	private static final int IDLE_TIME = 5;
 	Map<String, Object> exportClassMap = new HashMap<String, Object>();
 	public Server(AddressProvider addressProvider){
 		this.addressProvider = addressProvider;
@@ -67,6 +69,8 @@ public class Server implements ApplicationContextAware, InitializingBean{
 								throws Exception {
 							ch.pipeline().addLast(new Encoder(Response.class))
 										 .addLast(new Decoder(Request.class))
+										 .addLast(new IdleStateHandler(0, 0, IDLE_TIME))
+										 .addLast(new ServerHeartBeatHandler())
 										 .addLast(new ServerHandler(exportClassMap));
 						}
 				 		 

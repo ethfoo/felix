@@ -7,6 +7,7 @@ public class Request {
 	private String methodName;
 	private Class<?>[] parameterTypes;
 	private Object[] parameters;
+	private boolean heartBeat;
 	
 	public String getRequestId() {
 		return requestId;
@@ -37,6 +38,12 @@ public class Request {
 	}
 	public void setParameters(Object[] parameters) {
 		this.parameters = parameters;
+	}
+	public boolean isHeartBeat() {
+		return heartBeat;
+	}
+	public void setHeartBeat(boolean heartBeat) {
+		this.heartBeat = heartBeat;
 	}
 	@Override
 	public String toString() {

@@ -39,13 +39,19 @@ public class ServerHandler extends SimpleChannelInboundHandler<Request>{
 			hook.beforeInvoke(request);
 		}
 		Response response = new Response();
-		response.setRequestId(request.getRequestId());
-		try{
-			Object result = handle(request);
-			response.setResult(result);
-		}catch(Throwable t){
-			response.setError(t);
+		
+		if( response.isHeartBeat() ){
+			ctx.fireChannelRead(request);
+		}else{
+			response.setRequestId(request.getRequestId());
+			try{
+				Object result = handle(request);
+				response.setResult(result);
+			}catch(Throwable t){
+				response.setError(t);
+			}
 		}
+		
 		
 		ctx.writeAndFlush(response);
 		if( hook != null){
