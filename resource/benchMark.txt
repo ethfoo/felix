@@ -1,0 +1,66 @@
+
+/* 异步 */
+threadNum-->10
+loopNum-->10000
+startTime=1460027477184
+endTime=1460027480527
+use time: 3.3429999351501465
+time per request3.342999935150146E-5
+tps-->29913.252150723907
+
+
+threadNum-->10
+loopNum-->100000
+startTime=1460027924459
+endTime=1460027943994
+use time: 19.53499984741211
+tps-->51190.17188692093
+
+
+/*同步*/
+threadNum-->10
+loopNum-->10000
+startTime=1460028232152
+endTime=1460028236275
+use time: 4.123000144958496
+tps-->24254.182993972863
+
+
+threadNum-->10
+loopNum-->100000
+startTime=1460028150299
+endTime=1460028175377
+use time: 25.077999114990234
+tps-->39875.58957214635
+
+threadNum-->30
+loopNum-->10000
+startTime=1460028347005
+endTime=1460028354843
+use time: 7.8379998207092285
+tps-->38275.071046487246
+
+threadNum-->10
+loopNum-->30000
+startTime=1460028484493
+endTime=1460028493408
+use time: 8.914999961853027
+tps-->33651.14989160847
+
+
+
+/*************dubbo*****************/
+/*同步, 默认配置： netty, hessian*/
+threadNum-->30
+loopNum-->10000
+startTime=1460028864218
+endTime=1460028877337
+use time: 13.119000434875488
+tps-->22867.59585756865
+
+threadNum-->10
+loopNum-->100000
+startTime=1460030111995
+endTime=1460030153979
+use time: 41.98400115966797
+tps-->23818.596903066315
